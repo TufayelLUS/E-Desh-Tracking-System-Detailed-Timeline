@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courier Tracking</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #4285F4, #34A853);
+            color: #fff;
+            padding: 20px;
+        }
+
+        .tracking-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            color: #333;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #4285F4;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #4285F4;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #34A853;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #34A853;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #4285F4;
+        }
+
+        .timeline {
+            margin-top: 20px;
+            list-style: none;
+            padding: 0;
+        }
+
+        .timeline-item {
+            background-color: #f1f1f1;
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #4285F4;
+        }
+
+        .timeline-item.completed {
+            border-left-color: #34A853;
+        }
+
+        .timeline-item span {
+            font-weight: bold;
+        }
+
+        small {
+            background-color: #9cbdff;
+            border-radius: 8px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tracking-container">
+        <h1>Track Your Package</h1>
+        <input type="text" name="trackingNumber" id="trackingNumber" placeholder="Enter Tracking Number">
+        <button onclick="trackPackage()">Track</button>
+
+        <ul class="timeline" id="timeline"></ul>
+    </div>
+
+    <script>
+        async function trackPackage() {
+            const trackingNumber = document.getElementById('trackingNumber').value;
+            const timelineElement = document.getElementById('timeline');
+            timelineElement.innerHTML = '';
+
+            if (trackingNumber.trim() === '') {
+                alert('Please enter a tracking number.');
+                return;
+            }
+
+            // Mock API URL (replace with actual API endpoint)
+            const apiUrl = `http://localhost/?trackingNumber=${trackingNumber}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                data.timeline = data.data.history;
+
+                data.timeline.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('timeline-item');
+                    if (item.statusNameEng === 'Delivered') {
+                        listItem.classList.add('completed');
+                    }
+                    listItem.innerHTML = `
+                        <div><b>${item.statusNameEng}</b><br><b>Updated By:</b> ${item.postedBy}<br><b>Delivery Person Name:</b> ${item.feName}<br><b>Delivery Person Phone:</b> ${item.fePhone}<br><i>Comments: ${item.comments}</i></div>
+                        <small>${item.postedOn}</small>
+                    `;
+                    timelineElement.appendChild(listItem);
+                });
+
+            } catch (error) {
+                console.error('Error fetching tracking data:', error);
+                alert('Failed to fetch tracking information. Please try again later.');
+            }
+        }
+    </script>
+
+</body>
+</html>
